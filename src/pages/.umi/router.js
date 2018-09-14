@@ -98,7 +98,7 @@ let routes = [
       },
       {
         "path": "/city",
-        "icon": "car",
+        "iconfont": "icon-city",
         "name": "city",
         "routes": [
           {
@@ -134,7 +134,7 @@ let routes = [
       },
       {
         "path": "/bus",
-        "icon": "al:icon-bus",
+        "iconfont": "icon-bus",
         "name": "bus",
         "routes": [
           {

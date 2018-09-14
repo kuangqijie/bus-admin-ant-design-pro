@@ -39,7 +39,7 @@ export default [
       },
       {
         path:'/city',
-        icon:'car',
+        iconfont:'icon-city',
         name:'city',
         routes:[
           { path: '/city/order', name:'order', icon:'shopping-cart', component: './City/Order', },
@@ -51,7 +51,7 @@ export default [
 
       {
         path:'/bus',
-        icon:'al:icon-bus', //自定义图标
+        iconfont:'icon-bus', //自定义图标
         name:'bus',
         routes:[
           { path: '/bus/order', name:'order', icon:'shopping-cart', component: './Bus/Order', },

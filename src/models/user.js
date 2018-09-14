@@ -24,8 +24,8 @@ export default {
         payload: response,
       });
     },
-    *fetchAuthority(_, { call, put }) { //获取权限数据
-      const response = yield call(queryAuthority);
+    *fetchAuthority({payload}, { call, put }) { //获取权限数据
+      const response = yield call(queryAuthority, payload);
       //console.log(response)
       yield put({
         type: 'saveAuthority',

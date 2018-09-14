@@ -45,7 +45,12 @@ class CityOrder extends PureComponent {
     isShowRefundModal: false, //是否显示退票弹窗
     selectedRows: [],
     formValues: {},
+    expandForm: false,
   };
+
+  componentDidMount() {
+    this.fetchData({pageNum:1});
+  }
 
   columns = [
     { title: '订单号', dataIndex: 'orderNo', },
@@ -54,13 +59,13 @@ class CityOrder extends PureComponent {
       dataIndex: 'createDate',
       render: (val) => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
     },
-    { 
-      title: '行程', 
-      dataIndex: 'line', 
+    {
+      title: '行程',
+      dataIndex: 'line',
       render: (val,record) => <span>{record.startStationName+'-'+record.endStationName}</span>,
     },
-    { 
-      title: '出发时间', 
+    {
+      title: '出发时间',
       dataIndex: 'goTime',
       render:(val,record)=><span>{record.startDate+' '+record.startTime}</span>
     },
@@ -69,9 +74,9 @@ class CityOrder extends PureComponent {
     { title: '票张数', dataIndex: 'ticketNum', },
     { title: '票价', dataIndex: 'ticketPrice', },
     { title: '订单总额', dataIndex: 'totalMoney', },
-    { 
-      title: '订单状态', 
-      dataIndex: 'orderStatus', 
+    {
+      title: '订单状态',
+      dataIndex: 'orderStatus',
       render:(val)=><span>{orderStatus[val]}</span>
     },
     {
@@ -89,7 +94,7 @@ class CityOrder extends PureComponent {
       },
     },
   ];
-  
+
   //获取订单列表数据
   fetchData = (params)=>{
     const { dispatch } = this.props;
@@ -102,10 +107,13 @@ class CityOrder extends PureComponent {
       }
     });
   }
-
-  componentDidMount() {
-    this.fetchData({pageNum:1});
-  }
+  //展开查询表单
+  toggleForm = () => {
+    const { expandForm } = this.state;
+    this.setState({
+      expandForm: !expandForm,
+    });
+  };
 
   //表格change 分页、排序、筛选变化时触发
   onTableChange = (pagination, filtersArg, sorter) => {
@@ -202,7 +210,7 @@ class CityOrder extends PureComponent {
   };
 
   //查询表单
-  renderForm() {
+  renderSimpleForm() {
     const {
       form: { getFieldDecorator },
     } = this.props;
@@ -241,11 +249,105 @@ class CityOrder extends PureComponent {
               <Button type="primary" style={{ marginLeft: 8 }} onClick={this.onExportExcel}>
                 导出
               </Button>
+              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
+                展开 <Icon type="down" />
+              </a>
             </div>
           </Col>
         </Row>
       </Form>
     );
+  }
+
+  renderAdvancedForm(){
+    const {
+      form: { getFieldDecorator },
+    } = this.props;
+    return (
+      <Form onSubmit={this.onSearch} layout="inline">
+        <Row gutter={{ md: 8, xl:16, xxl:24 }}>
+          <Col span={5}>
+            <FormItem label="订单状态">
+              {getFieldDecorator('status')(
+                <Select placeholder="请选择" style={{ width: '100%' }}>
+                  <Option value="1">已支付</Option>
+                  <Option value="2">已关闭</Option>
+                  <Option value="3">全部退票</Option>
+                </Select>
+              )}
+            </FormItem>
+          </Col>
+          <Col span={6}>
+            <FormItem label="关键字">
+              {getFieldDecorator('name')(<Input placeholder="请输入手机或身份证号" />)}
+            </FormItem>
+          </Col>
+          <Col span={7}>
+            <FormItem label="下单日期">
+              {getFieldDecorator('date')(
+                <RangePicker style={{ width: '100%' }} />
+              )}
+            </FormItem>
+          </Col>
+
+          <Col span={6}>
+            <FormItem label="订单状态">
+              {getFieldDecorator('status')(
+                <Select placeholder="请选择" style={{ width: '100%' }}>
+                  <Option value="1">已支付</Option>
+                  <Option value="2">已关闭</Option>
+                  <Option value="3">全部退票</Option>
+                </Select>
+              )}
+            </FormItem>
+          </Col>
+        </Row>
+        <Row gutter={{ md: 8, xl:16, xxl:24 }}>
+          <Col span={5}>
+            <FormItem label="订单状态">
+              {getFieldDecorator('status')(
+                <Select placeholder="请选择" style={{ width: '100%' }}>
+                  <Option value="1">已支付</Option>
+                  <Option value="2">已关闭</Option>
+                  <Option value="3">全部退票</Option>
+                </Select>
+              )}
+            </FormItem>
+          </Col>
+          <Col span={6}>
+            <FormItem label="关键字">
+              {getFieldDecorator('name')(<Input placeholder="请输入手机或身份证号" />)}
+            </FormItem>
+          </Col>
+          <Col span={7}>
+            <FormItem label="下单日期">
+              {getFieldDecorator('date')(
+                <RangePicker style={{ width: '100%' }} />
+              )}
+            </FormItem>
+          </Col>
+
+          <Col span={6}>
+            <div style={{ marginBottom: 24 }}>
+              <Button type="primary" htmlType="submit">
+                查询
+              </Button>
+              <Button type="primary" style={{ marginLeft: 8 }} onClick={this.onExportExcel}>
+                导出
+              </Button>
+              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
+              收起 <Icon type="up" />
+              </a>
+            </div>
+          </Col>
+        </Row>
+      </Form>
+    );
+  }
+
+  renderForm() {
+    const { expandForm } = this.state;
+    return expandForm ? this.renderAdvancedForm() : this.renderSimpleForm();
   }
 
   //设置退票弹窗是否显示

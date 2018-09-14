@@ -11,8 +11,7 @@ import PageLoading from '@/components/PageLoading';
 
 const Authorized = RenderAuthorized(['admin','user']);
 
-export default @connect(({ user, login, loading }) => ({
-  login,
+export default @connect(({ user, loading }) => ({
   loadingAuth:loading.effects['user/fetchAuthority'],
   authorityList:user.authorityList || []
 }))
@@ -31,8 +30,9 @@ class AuthorizedWrap extends React.Component {
     const { dispatch } = this.props;
     dispatch({
       type: 'user/fetchAuthority',
-    }).then(function(){
-      //console.log(9)
+      payload: {
+        token:'@dfasd'
+      }
     });
     //console.log(dispatch)
   }
@@ -71,8 +71,7 @@ class AuthorizedWrap extends React.Component {
   }
 
   render(){
-    const {loadingAuth, login} = this.props;
-    console.log(login);
+    const {loadingAuth} = this.props;
     //console.log(loadingAuth)
 
     const noMatch = (
