@@ -32,5 +32,5 @@ const orderDet = {
 
 export default {
     '/api/admin/bus/getOrderList': order,
-    '/api/order/detail': orderDet,
+    '/api/admin/bus/getOrderDetail': orderDet,
 }

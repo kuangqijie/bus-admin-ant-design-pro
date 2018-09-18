@@ -23,6 +23,8 @@ export default {
 
       // Login successfully
       if (response.status === true) {
+        sessionStorage.token = response.data.token; //保存token
+
         reloadAuthorized();
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
@@ -55,6 +57,9 @@ export default {
           currentAuthority: 'guest',
         },
       });
+      
+      sessionStorage.removeItem('token'); //移除token
+
       reloadAuthorized();
       yield put(
         routerRedux.push({
@@ -70,7 +75,7 @@ export default {
   reducers: {
     changeLoginStatus(state, { payload }) {
       //setAuthority(payload.currentAuthority);
-      console.log(payload)
+      
       return {
         ...state,
         ...payload,

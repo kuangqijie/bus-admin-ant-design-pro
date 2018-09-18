@@ -55,7 +55,7 @@ export default [
         name:'bus',
         routes:[
           { path: '/bus/order', name:'order', icon:'shopping-cart', component: './Bus/Order', },
-          { path: '/bus/order/detail/:id', hideInMenu:true, name:'orderdetail', component: './Bus/OrderDetail/$id.js' },
+          { path: '/bus/order/detail', hideInMenu:true, name:'orderdetail', component: './Bus/OrderDetail' },
           { component: '404', isCanTurn:true },
         ]
       },

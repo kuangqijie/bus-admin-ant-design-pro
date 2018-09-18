@@ -5,10 +5,7 @@ export default {
 
   state: {
     list: [],
-    pagination: {
-        total: 50,
-        showTotal: (t)=> '共'+t+'条数据'
-    }
+    total: 0
   },
 
   effects: {
@@ -17,7 +14,7 @@ export default {
       //console.log(response)
       yield put({
         type: 'save',
-        payload: response,
+        payload: response.data,
       });
     },
   },

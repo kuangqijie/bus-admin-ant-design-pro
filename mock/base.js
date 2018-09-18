@@ -9,5 +9,5 @@ const station = {
 
 
 export default {
-    '/api/station': station,
+    '/api/admin/bus/getStationList': station,
 }

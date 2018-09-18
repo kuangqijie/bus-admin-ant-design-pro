@@ -17,7 +17,7 @@ export default {
         {type:2, path:'/city/line'},
         {type:1, path:'/bus'},
         {type:2, path:'/bus/order'},
-        {type:3, path:'/bus/order/detail/:id'},
+        {type:3, path:'/bus/order/detail'},
       ])
     },1000)
 

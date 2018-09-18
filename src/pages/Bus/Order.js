@@ -89,7 +89,7 @@ class BusOrder extends PureComponent {
         return (
           <Fragment>
             <a className="f-mr10" onClick={()=>this.setRefundModal(true)}>退票</a>
-            <Link to={`/bus/order/detail/${record.id}`}>订单详情</Link>
+            <Link to={`/bus/order/detail?orderNo=${record.orderNo}`}>订单详情</Link>
           </Fragment>
         )
       },
@@ -102,7 +102,6 @@ class BusOrder extends PureComponent {
     dispatch({
       type: 'busOrder/fetch',
       payload:{
-        token:'@lkjkadf@456',
         pageSize: this.state.pageSize,
         ...params,
       }
@@ -111,7 +110,6 @@ class BusOrder extends PureComponent {
 
   //表格change 分页、排序、筛选变化时触发
   onTableChange = (pagination, filtersArg, sorter) => {
-    const { dispatch } = this.props;
     const { formValues } = this.state;
 
     const filters = Object.keys(filtersArg).reduce((obj, key) => {
@@ -121,7 +119,7 @@ class BusOrder extends PureComponent {
     }, {});
 
     //console.log(filters)
-    console.log(pagination)
+    //console.log(pagination)
     const params = {
       pageNum: pagination.current,
       pageSize: pagination.pageSize,
@@ -181,10 +179,15 @@ class BusOrder extends PureComponent {
       if (err) return;
 
       //解析时间
-      var orderTime = {}
+      var orderTime = {} //下车时间
       if(fieldsValue.orderTime){
         orderTime.beginDate = fieldsValue.orderTime[0].format('YYYY-MM-DD')
         orderTime.endDate = fieldsValue.orderTime[1].format('YYYY-MM-DD')
+      }
+      var startTime = {} //发车时间
+      if(fieldsValue.startTime){
+        startTime.departureDate = fieldsValue.startTime[0].format('YYYY-MM-DD')
+        startTime.arriveDate = fieldsValue.startTime[1].format('YYYY-MM-DD')
       }
 
       const values = {
@@ -195,7 +198,7 @@ class BusOrder extends PureComponent {
         formValues: values,
       });
 
-      this.fetchData({pageNum:1, ...values, ...orderTime})
+      this.fetchData({pageNum:1, ...values, ...orderTime, ...startTime})
     });
   };
 
@@ -234,30 +237,27 @@ class BusOrder extends PureComponent {
     return (
       <Form onSubmit={this.onSearch} layout="inline">
         <Row gutter={{ md: 8, xl:16, xxl:24 }}>
-          <Col span={8}>
+          <Col span={6}>
             <FormItem label="订单状态">
               {getFieldDecorator('orderStatus')(
                 this.renderSelectStatus()
               )}
             </FormItem>
           </Col>
-          <Col span={8}>
-            <FormItem label="关键字">
-              {getFieldDecorator('keyword')(<Input placeholder="请输入订单号或手机号" />)}
+          <Col span={6}>
+            <FormItem label="订单号">
+              {getFieldDecorator('orderNo')(<Input placeholder="请输入订单号" />)}
             </FormItem>
           </Col>
-
-          <Col span={8}>
+          <Col span={6}>
+            <FormItem label="手机号">
+              {getFieldDecorator('mobilePhone')(<Input placeholder="请输入手机号" />)}
+            </FormItem>
+          </Col>
+          <Col span={6}>
             <div style={{ marginBottom: 24 }}>
-              <Button type="primary" htmlType="submit" className="f-mr10">
-                查询
-              </Button>
-              <Button type="primary" className="f-mr10" onClick={this.onFormReset}>
-                重置
-              </Button>
-              <Button type="primary" className="f-mr10" onClick={this.onExportExcel}>
-                导出
-              </Button>
+              <Button type="primary" htmlType="submit" className="f-mr10">查询</Button>
+              <Button type="primary" className="f-mr10" onClick={this.onFormReset}>重置</Button>
               <a onClick={this.toggleForm}> 展开 <Icon type="down" /> </a>
             </div>
           </Col>
@@ -280,13 +280,18 @@ class BusOrder extends PureComponent {
               )}
             </FormItem>
           </Col>
-          <Col span={8}>
-            <FormItem label="关键字">
-              {getFieldDecorator('name')(<Input placeholder="请输入订单号或手机号" />)}
+          <Col span={6}>
+            <FormItem label="订单号">
+              {getFieldDecorator('orderNo')(<Input placeholder="请输入订单号" />)}
             </FormItem>
           </Col>
-          <Col span={10}>
-            <FormItem label="取票人身份证">
+          <Col span={6}>
+            <FormItem label="手机号">
+              {getFieldDecorator('mobilePhone')(<Input placeholder="请输入手机号" />)}
+            </FormItem>
+          </Col>
+          <Col span={6}>
+            <FormItem label="身份证">
               {getFieldDecorator('certificateNo')(<Input placeholder="请输入取票人身份证" />)}
             </FormItem>
           </Col>
@@ -337,7 +342,7 @@ class BusOrder extends PureComponent {
 
   render() {
     const { order, loading, } = this.props;
-    console.log(order)
+    //console.log(order)
     const data = {
       list: order.list,
       pagination: {

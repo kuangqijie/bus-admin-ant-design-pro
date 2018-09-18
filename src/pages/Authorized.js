@@ -20,7 +20,7 @@ class AuthorizedWrap extends React.Component {
     super(props);
     //console.log(props)
 
-    if(sessionStorage.isLogin == 2){
+    if(!sessionStorage.token){
       console.log('nologin')
       router.replace('/user/login');
     }
@@ -87,7 +87,9 @@ class AuthorizedWrap extends React.Component {
       (
       <Authorized
       authority={this.isCanTurn}
-      noMatch={noMatch}>
+      noMatch={noMatch}
+      token={sessionStorage.token}
+      >
         {this.props.children}
       </Authorized>
       )

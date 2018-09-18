@@ -3,7 +3,12 @@ import request from '@/utils/request';
 
 export async function queryOrderDetail(params) {
     //console.log(params)
-    return request('/api/order/detail');
+    return request('/api/admin/bus/getOrderDetail', {
+        method: 'POST',
+        body: {
+            ...params,
+        },
+    });
 }
 
 export async function queryOrderList(params) {

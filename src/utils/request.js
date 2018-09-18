@@ -103,7 +103,7 @@ export default function request(
       };
     }
   }
-
+  
   const expirys = options.expirys || 60;
   // options.expirys !== false, return the cache,
   if (options.expirys !== false) {
@@ -119,18 +119,39 @@ export default function request(
       sessionStorage.removeItem(`${hashcode}:timestamp`);
     }
   }
+  
+  if(newOptions.headers){
+    //发送token
+    newOptions.headers.token = sessionStorage.getItem('token');
+  }
+  
   return fetch(url, newOptions)
     .then(checkStatus)
     .then(response => cachedSave(response, hashcode))
     .then(response => {
+      
       // DELETE and 204 do not return data by default
       // using .json will report an error.
       if (newOptions.method === 'DELETE' || response.status === 204) {
         return response.text();
       }
-      return response.json();
+      
+      //统一处理请求异常状态
+      var res = response.json();
+      res.then(res=>{
+        console.log(res)
+        if(res.code && res.code != 1000){
+          notification.error({
+            message: `请求错误 ${response.status}: ${response.url}`,
+            description: res.message,
+          });
+        }
+      })
+      return res;
+      //return response.json();
     })
     .catch(e => {
+      console.log('request.js error')
       const status = e.name;
       if (status === 401) {
         // @HACK
@@ -150,7 +171,7 @@ export default function request(
         return;
       }
       if (status >= 404 && status < 422) {
-        router.push('/exception/404');
+        //router.push('/exception/404');
       }
     });
 }
