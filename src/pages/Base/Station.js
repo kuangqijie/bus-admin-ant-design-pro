@@ -50,10 +50,30 @@ class GDMap extends Component{
     super(props);
     this.mapRef = React.createRef();
     this.mapBtnRef = React.createRef();
+
+    this.state = {
+      posList:{
+        [Symbol()]:[
+          [114.114089, 22.532949],
+          [114.117737, 22.531145],
+          [114.117715, 22.533999]
+        ]
+      }
+    }
   }
 
   map = null;
   type = 1;
+  areaNum = 0;
+
+  nodeChange = (e, key)=>{
+    var paths = e.obj.getPath().map(item => {
+      return [item.lng, item.lat]
+    });
+    this.state.posList[key] = paths;
+    this.setState({posList: this.state.posList })
+    console.log(this.state.posList)
+  }
 
   //点
   initMap = ()=>{
@@ -112,24 +132,87 @@ class GDMap extends Component{
   //面
   initMap2 = ()=>{
     console.log('init2')
+    
     //初始化地图
     var map = this.map = new AMap.Map(this.mapRef.current, {
       cursor: 'default',
       center:[114.117361,22.532572],
       zoom: 16
     });
-    
+
     //在地图中添加MouseTool插件
     var mouseTool = new AMap.MouseTool(map);
+    console.log(mouseTool)
+    var {posList} = this.state;
+    var keys = Object.getOwnPropertySymbols(posList);
+
+    var polygonList = {}
+    var polygonNum = 0;
+    keys.forEach(item=>{
+      polygonNum++;
+      var polygon = new AMap.Polygon({
+        path: posList[item],//设置多边形边界路径
+        // strokeColor: "#FF33FF", //线颜色
+        // strokeOpacity: 0.2, //线透明度
+        // strokeWeight: 3,    //线宽
+        // fillColor: "#1791fc", //填充色
+        // fillOpacity: 0.35//填充透明度
+      });
+      polygonList[polygonNum] = polygon;
+      //添加已有的形状
+      map.add(polygon)
+      //mouseTool.polygon({path:posList[item]})
+    })
+  
   
     //点击开始绘制
-    AMap.event.addDomListener(this.mapBtnRef.current, 'click', function() {
+    AMap.event.addDomListener(this.mapBtnRef.current, 'click', ()=> {
       mouseTool.polygon();
+
+      //已有形状开启编辑
+      for(let [key, val] of Object.entries(polygonList)){
+        console.log(key,val)
+        let editPolygon = new AMap.PolyEditor(map, val);
+        editPolygon.open(); //开启编辑
+      }
     }, false);
+
+
     //监听绘制事件
-    AMap.event.addListener( mouseTool,'draw',function(e){ 
+    AMap.event.addListener( mouseTool,'draw',(e)=>{ 
+      //e.obj为多边形对象 通过AMap.PolyEditor插件开启多边形编辑
       var editPolygon = new AMap.PolyEditor(map, e.obj);
       editPolygon.open(); //开启编辑
+      this.areaNum++;
+      var key = Symbol(this.areaNum);
+      var paths = e.obj.getPath().map(item => {
+        return {lng:item.lng, lat:item.lat}
+      });
+
+      //节点change事件
+      //editPolygon.on('addnode',()=>{this.nodeChange(e, key)})
+      editPolygon.on('removenode',()=>{this.nodeChange(e, key)})
+      editPolygon.on('adjust',()=>{this.nodeChange(e, key)})
+
+      var contextMenu = new AMap.ContextMenu();  //创建右键菜单
+      //右键放大
+      contextMenu.addItem("删除此区域", ()=>{
+        delete this.state.posList[key];
+        editPolygon.close()
+        this.map.remove(e.obj);
+        this.setState({posList: this.state.posList})
+      }, 0);
+
+      //多边形绑定右键菜单
+      e.obj.on('rightclick',(e)=>{
+        contextMenu.open(this.map, e.lnglat);
+      })
+
+      this.state.posList[key] = paths;
+      this.setState({posList: this.state.posList })
+      //this.state.proList.push(paths);
+      //this.setState({posList: this.state.posList.concat(paths)})
+      console.log(this.state.posList)
     });
   }
 
