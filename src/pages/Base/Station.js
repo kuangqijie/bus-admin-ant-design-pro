@@ -50,15 +50,16 @@ class GDMap extends Component{
     super(props);
     this.mapRef = React.createRef();
     this.mapBtnRef = React.createRef();
+    console.log(props);
+
+    var {locationData} = props;
+    var posList = {};
+    for(let k in locationData){
+      posList[Symbol(k)] = locationData[k];
+    }
 
     this.state = {
-      posList:{
-        [Symbol()]:[
-          [114.114089, 22.532949],
-          [114.117737, 22.531145],
-          [114.117715, 22.533999]
-        ]
-      }
+      posList
     }
   }
 
@@ -66,22 +67,63 @@ class GDMap extends Component{
   type = 1;
   areaNum = 0;
 
-  nodeChange = (e, key)=>{
-    var paths = e.obj.getPath().map(item => {
+  //绘制区域样式配置
+  polygonOptions = {
+    strokeColor: "#1791FC", //线颜色
+    strokeWeight: 2,    //线宽
+    fillColor: "#1791FC", //填充色
+    fillOpacity: 0.3//填充透明度
+  };
+
+  //区域节点change
+  nodeChange = (polygon, key)=>{
+    var {updateMapData} = this.props;
+    var paths = polygon.getPath().map(item => {
       return [item.lng, item.lat]
     });
     this.state.posList[key] = paths;
     this.setState({posList: this.state.posList })
     console.log(this.state.posList)
+
+    updateMapData(this.state.posList)
+  }
+
+  //绘制区域编辑功能Init, polygon=>多边形对象
+  initAreaEdit = (polygon, key)=>{
+    //通过AMap.PolyEditor插件开启多边形编辑
+    var editPolygon = new AMap.PolyEditor(this.map, polygon);
+    //editPolygon.open(); //开启编辑
+
+    //节点change事件
+    editPolygon.on('removenode',()=>{this.nodeChange(polygon, key)})
+    editPolygon.on('adjust',()=>{this.nodeChange(polygon, key)})
+
+    var contextMenu = new AMap.ContextMenu();  //创建右键菜单
+    //右键删除
+    contextMenu.addItem("删除此区域", ()=>{
+      delete this.state.posList[key];
+      editPolygon.close()
+      this.map.remove(polygon);
+      this.setState({posList: this.state.posList})
+      this.props.updateMapData(this.state.posList)
+    }, 0);
+
+    //多边形绑定右键菜单
+    polygon.on('rightclick',(e)=>{
+      contextMenu.open(this.map, e.lnglat);
+    })
+
+    return editPolygon;
   }
 
   //点
   initMap = ()=>{
     console.log('init')
+    var center = this.map ? this.map.getCenter() : '';
     //初始化地图
     var map = this.map = new AMap.Map(this.mapRef.current, {
-      cursor: 'default',
-      center:[116.406956,39.905019],
+      resizeEnable: true,
+      center,
       zoom: 10
     });
 
@@ -104,26 +146,21 @@ class GDMap extends Component{
       return p;
     }
 
-    var markerDot = {};
-    var n = 0;
     //为地图注册click事件获取鼠标点击出的经纬度坐标
     map.on('click', function(e) {
       var lnglat = [e.lnglat.getLng(), e.lnglat.getLat()]
 
       getAddress(lnglat).then(adress=>{
-        n++;
+        map.clearMap();
         //标记点
-        markerDot[n] = new AMap.Marker({ position: lnglat });
-        // 设置label标签 默认蓝框白底左上角显示，样式className为：amap-marker-label
-        markerDot[n].setLabel({
-          offset: new AMap.Pixel(20, 20), //修改label相对于maker的位置
-          content: adress
+        new AMap.Marker({
+          map, //标记渲染的地图对象
+          position: lnglat,
+          label:{ //设置label标签
+            offset: new AMap.Pixel(20, 20), //修改label相对于maker的位置
+            content: adress
+          }
         });
-
-        map.add(markerDot[n])
-        if(markerDot[n-1]){ //删除前一个点
-          map.remove(markerDot[n-1])
-        }
       })
     });
 
@@ -132,118 +169,137 @@ class GDMap extends Component{
   //面
   initMap2 = ()=>{
     console.log('init2')
-    
+    var center = this.map ? this.map.getCenter() : '';
     //初始化地图
     var map = this.map = new AMap.Map(this.mapRef.current, {
-      cursor: 'default',
-      center:[114.117361,22.532572],
+      resizeEnable: true,
+      center,
       zoom: 16
     });
 
+    // if(this.props.belongCity){
+    //   map.setCity(this.props.belongCity)
+    // }
+
     //在地图中添加MouseTool插件
     var mouseTool = new AMap.MouseTool(map);
-    console.log(mouseTool)
+
     var {posList} = this.state;
     var keys = Object.getOwnPropertySymbols(posList);
 
-    var polygonList = {}
-    var polygonNum = 0;
+    var polygonList = [];
+    //添加已有形状
     keys.forEach(item=>{
-      polygonNum++;
       var polygon = new AMap.Polygon({
         path: posList[item],//设置多边形边界路径
-        // strokeColor: "#FF33FF", //线颜色
-        // strokeOpacity: 0.2, //线透明度
-        // strokeWeight: 3,    //线宽
-        // fillColor: "#1791fc", //填充色
-        // fillOpacity: 0.35//填充透明度
+        ...this.polygonOptions
       });
-      polygonList[polygonNum] = polygon;
-      //添加已有的形状
       map.add(polygon)
-      //mouseTool.polygon({path:posList[item]})
+      polygonList.push( this.initAreaEdit(polygon, item) );
     })
-  
-  
+
     //点击开始绘制
     AMap.event.addDomListener(this.mapBtnRef.current, 'click', ()=> {
-      mouseTool.polygon();
+      mouseTool.polygon(this.polygonOptions);
 
       //已有形状开启编辑
-      for(let [key, val] of Object.entries(polygonList)){
-        console.log(key,val)
-        let editPolygon = new AMap.PolyEditor(map, val);
-        editPolygon.open(); //开启编辑
+      for(let item of polygonList){
+        item.open();
       }
     }, false);
 
 
     //监听绘制事件
-    AMap.event.addListener( mouseTool,'draw',(e)=>{ 
+    AMap.event.addListener( mouseTool,'draw',(e)=>{
       //e.obj为多边形对象 通过AMap.PolyEditor插件开启多边形编辑
-      var editPolygon = new AMap.PolyEditor(map, e.obj);
-      editPolygon.open(); //开启编辑
+      //var editPolygon = new AMap.PolyEditor(map, e.obj);
+      //editPolygon.open();
+      var {updateMapData} = this.props;
+
       this.areaNum++;
       var key = Symbol(this.areaNum);
       var paths = e.obj.getPath().map(item => {
-        return {lng:item.lng, lat:item.lat}
+        return [item.lng, item.lat]
       });
 
-      //节点change事件
-      //editPolygon.on('addnode',()=>{this.nodeChange(e, key)})
-      editPolygon.on('removenode',()=>{this.nodeChange(e, key)})
-      editPolygon.on('adjust',()=>{this.nodeChange(e, key)})
-
-      var contextMenu = new AMap.ContextMenu();  //创建右键菜单
-      //右键放大
-      contextMenu.addItem("删除此区域", ()=>{
-        delete this.state.posList[key];
-        editPolygon.close()
-        this.map.remove(e.obj);
-        this.setState({posList: this.state.posList})
-      }, 0);
-
-      //多边形绑定右键菜单
-      e.obj.on('rightclick',(e)=>{
-        contextMenu.open(this.map, e.lnglat);
-      })
+      //开启编辑
+      this.initAreaEdit(e.obj, key).open();
 
       this.state.posList[key] = paths;
       this.setState({posList: this.state.posList })
-      //this.state.proList.push(paths);
-      //this.setState({posList: this.state.posList.concat(paths)})
-      console.log(this.state.posList)
+
+      updateMapData(this.state.posList)
     });
   }
 
   componentDidMount(){
     this.initMap()
   }
-  componentWillUpdate(props){
-    var stationType = props.stationType;
-    console.log(props)
-    if(props.isShowModal){
-      if(stationType != this.type || !this.map){
-        this.type = stationType;
-        
-        if(stationType == 1){
+  //父组件props改变
+  componentWillReceiveProps(nextProps){
+    var {stationType:preType} = this.props;
+    var {stationType:nextType} = nextProps;
+    var map = this.map;
+
+    if(nextProps.isShowModal){
+      //站点类型change 
+      if(preType != nextType){
+        if(nextType == 1){
           this.initMap()
         }else{
           this.initMap2()
         }
-        
       }
     }else{
-      if(this.map){
-        //this.map.destroy();
-        this.type = stationType==1 ? 2 : 1;
-      }
+      //弹窗关闭重置map
+      setTimeout(()=>{
+        this.initMap()
+      },0)
+    }
+
+    //详细地址change
+    if(nextProps.address && nextProps.address != this.props.address){
+      console.log(nextProps.address)
+      var placeSearch = new AMap.PlaceSearch({
+        type:'地名地址信息|公共设施',
+        pageSize:5,
+        children:1,
+        autoFitView:true,
+      });
+      //根据输入地址查询
+      placeSearch.search(nextProps.address, (status, res)=>{
+        console.log(status, res)
+        if(status=='complete' && res.info=='OK'){
+          console.log(6)
+          var poiArr = res.poiList.pois;
+          map.clearMap();
+          //添加marker
+          var marker = new AMap.Marker({
+              map,
+              position: poiArr[0].location,
+              label:{
+                offset: new AMap.Pixel(20, 20), 
+                content: poiArr[0].name
+              }
+          });
+          map.setCenter(marker.getPosition())
+          map.setZoom(16)
+        }
+      });
+    }
+
+    //所属城市change
+    if(nextProps.belongCity && nextProps.belongCity != this.props.belongCity){
+      //console.log(nextProps.belongCity)
+      map.setCity(nextProps.belongCity)
+      //console.log(map.getZoom())
     }
   }
 
+
   render(){
     const {stationType} = this.props;
-    
+
     return(
       <div className="f-mb10 f-pr">
         <div ref={this.mapRef} className={styles.map}></div>
@@ -258,21 +314,56 @@ class GDMap extends Component{
 class UpdateForm extends Component{
 
   state = {
-    stationType:1,
     formVals: {},
-    stationLnglatList:[ //经纬度数据
-      {index:0, lng:24, lat:56},
-      {index:0, lng:24, lat:56},
-      {index:0, lng:24, lat:56},
-      {index:1, lng:24, lat:56},
-      {index:1, lng:24, lat:56},
-      {index:1, lng:24, lat:56},
-    ] 
+    // stationLnglatList:[
+    //   {index:0, lng:114.114089, lat:22.532949},
+    //   {index:0, lng:114.117737, lat:22.531145},
+    //   {index:0, lng:114.117715, lat:22.533999},
+    // ],
+    locationData:{ //经纬度数据
+      '1':[
+        [114.114089, 22.532949],
+        [114.117737, 22.531145],
+        [114.117715, 22.533999]
+      ],
+      //'2':[114.114089, 22.532949]
+    }
   }
 
-  onTtypeChange = (v)=>{
-    this.setState({stationType:v});
+  //地图数据更新
+  updateMapData = (data)=>{
+    console.log(data);
+    var keys = Object.getOwnPropertySymbols(data);
+    var list = {};
+    keys.forEach((item,index)=>{
+      list[index] = data[item];
+    })
+    this.setState({locationData: list})
+    console.log(this.state.locationData)
   }
+
+  //类型change
+  onTypeChange = (v)=>{
+    var {form} = this.props;
+    var fieldsValue = form.getFieldsValue();
+    fieldsValue.stationType = v;
+    this.setState({formVals: fieldsValue});
+  }
+  //所属城市change
+  onCityChange = (v)=>{
+    var {form} = this.props;
+    var fieldsValue = form.getFieldsValue();
+    fieldsValue.belongCity = v;
+    this.setState({formVals: fieldsValue});
+  }
+
+  //详细地址输入地图联动
+  onInputAddress = (e)=>{
+    var {form} = this.props;
+    var fieldsValue = form.getFieldsValue();
+    this.setState({formVals: fieldsValue});
+  }
+
   //弹窗点击确定
   onConfirm = ()=>{
     const {onUpdate, form} = this.props;
@@ -295,13 +386,12 @@ class UpdateForm extends Component{
     setModal(false)
     //重置表单
     form.resetFields();
-    this.setState({
-      stationType:1
-    });
+    this.setState({ formVals: {} });
   }
 
   render(){
-    const {isShowModal, setModal, form:{getFieldDecorator}} = this.props;
+    const {isShowModal, form:{getFieldDecorator}} = this.props;
+    const { locationData, formVals} = this.state;
 
     return (
       <Modal title="添加站点" visible={isShowModal} width={700} onOk={this.onConfirm} onCancel={this.onCancel} maskClosable={false}>
@@ -313,7 +403,7 @@ class UpdateForm extends Component{
                   initialValue:'1',
                   rules: [{ required: true, message: '请选择站点类型!', }],
                 })(
-                  <Select placeholder="请选择" onChange={this.onTtypeChange}>
+                  <Select placeholder="请选择" onChange={this.onTypeChange}>
                     <Option value="1">点</Option>
                     <Option value="2">面</Option>
                   </Select>
@@ -322,13 +412,15 @@ class UpdateForm extends Component{
             </Col>
             <Col span={12}>
               <FormItem label="所属区域" {...formItemLayout}>
-                {getFieldDecorator('area',{
+                {getFieldDecorator('belongCity',{
                   rules: [{ required: true, message: '请选择所属区域!', }],
                 })(
-                  <Select placeholder="请选择">
-                    <Option value="1">北京</Option>
-                    <Option value="2">上海</Option>
-                    <Option value="3">深圳</Option>
+                  <Select placeholder="请选择" onChange={this.onCityChange}>
+                    <Option value="010">北京</Option>
+                    <Option value="021">上海</Option>
+                    <Option value="0755">深圳</Option>
+                    <Option value="0734">衡阳</Option>
+                    <Option value="0731">长沙</Option>
                   </Select>
                 )}
               </FormItem>
@@ -353,7 +445,7 @@ class UpdateForm extends Component{
           <FormItem label="详情地址" labelCol={{span:4}} wrapperCol={{span:20}}>
             {getFieldDecorator('address',{
               rules: [{ required: true, message: '请输入详情地址!', }],
-            })(<Input placeholder="请输入详情地址" />)}
+            })(<Input placeholder="请输入详情地址" onKeyUp={this.onInputAddress} />)}
           </FormItem>
           <Row>
             <Col span={12}>
@@ -365,7 +457,7 @@ class UpdateForm extends Component{
             </Col>
           </Row>
         </Form>
-        <GDMap isShowModal={isShowModal} stationType={this.state.stationType} />
+        <GDMap {...formVals} isShowModal={isShowModal} locationData={locationData} updateMapData={this.updateMapData} />
       </Modal>
     )
   }
