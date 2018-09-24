@@ -11,6 +11,8 @@ export default {
         {type:2, path:'/base/baseinfo'},
         {type:2, path:'/base/location'},
         {type:2, path:'/base/station'},
+        {type:2, path:'/base/carmodel'},
+        {type:2, path:'/base/staffs'},
         {type:1, path:'/city'},
         {type:2, path:'/city/order'},
         {type:3, path:'/city/order/detail/:id'},

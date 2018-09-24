@@ -17,6 +17,8 @@ app.model({ namespace: 'project', ...(require('F:/project/ant-design-pro/src/mod
 app.model({ namespace: 'setting', ...(require('F:/project/ant-design-pro/src/models/setting.js').default) });
 app.model({ namespace: 'user', ...(require('F:/project/ant-design-pro/src/models/user.js').default) });
 app.model({ namespace: 'register', ...(require('F:/project/ant-design-pro/src/pages/User/models/register.js').default) });
+app.model({ namespace: 'carmodel', ...(require('F:/project/ant-design-pro/src/pages/Base/models/carmodel.js').default) });
+app.model({ namespace: 'staffs', ...(require('F:/project/ant-design-pro/src/pages/Base/models/staffs.js').default) });
 app.model({ namespace: 'station', ...(require('F:/project/ant-design-pro/src/pages/Base/models/station.js').default) });
 app.model({ namespace: 'order', ...(require('F:/project/ant-design-pro/src/pages/City/models/order.js').default) });
 app.model({ namespace: 'orderDetail', ...(require('F:/project/ant-design-pro/src/pages/City/models/orderDetail.js').default) });

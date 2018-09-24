@@ -1,5 +1,5 @@
 import fetch from 'dva/fetch';
-import { notification } from 'antd';
+import { notification, message } from 'antd';
 import router from 'umi/router';
 import hash from 'hash.js';
 import { isAntdPro } from './utils';
@@ -127,7 +127,7 @@ export default function request(
   
   return fetch(url, newOptions)
     .then(checkStatus)
-    .then(response => cachedSave(response, hashcode))
+    //.then(response => cachedSave(response, hashcode)) //缓存
     .then(response => {
       
       // DELETE and 204 do not return data by default
@@ -139,12 +139,13 @@ export default function request(
       //统一处理请求异常状态
       var res = response.json();
       res.then(res=>{
-        console.log(res)
+        //console.log(res)
         if(res.code && res.code != 1000){
-          notification.error({
-            message: `请求错误 ${response.status}: ${response.url}`,
-            description: res.message,
-          });
+          // notification.error({
+          //   message: `请求错误 ${response.status}: ${response.url}`,
+          //   description: res.message,
+          // });
+          message.error(res.message)
         }
       })
       return res;

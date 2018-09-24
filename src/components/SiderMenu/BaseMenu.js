@@ -4,6 +4,7 @@ import Link from 'umi/link';
 import { formatMessage } from 'umi/locale';
 import pathToRegexp from 'path-to-regexp';
 import { urlToList } from '../_utils/pathTools';
+import IconFont from '@/components/IconFont';
 import styles from './index.less';
 
 const { SubMenu } = Menu;
@@ -12,10 +13,15 @@ const { SubMenu } = Menu;
 //   icon: 'setting',
 //   icon: 'http://demo.com/icon.png',
 //   icon: <Icon type="setting" />,
-const getIcon = icon => {
+const getIcon = (icon, iconfont) => {
   if (typeof icon === 'string' && icon.indexOf('http') === 0) {
     return <img src={icon} alt="icon" className={styles.icon} />;
   }
+
+  if(typeof iconfont === 'string'){ //自定义iconfont图标
+    return <IconFont className="f-mr10" type={iconfont} />
+  }
+
   if (typeof icon === 'string') {
     return <Icon type={icon} />;
   }
@@ -86,7 +92,7 @@ export default class BaseMenu extends PureComponent {
           title={
             item.icon ? (
               <span>
-                {getIcon(item.icon)}
+                {getIcon(item.icon, item.iconfont)}
                 <span>{name}</span>
               </span>
             ) : (
@@ -110,7 +116,7 @@ export default class BaseMenu extends PureComponent {
   getMenuItemPath = item => {
     const name = formatMessage({ id: item.locale });
     const itemPath = this.conversionPath(item.path);
-    const icon = getIcon(item.icon);
+    const icon = getIcon(item.icon, item.iconfont);
     const { target } = item;
     // Is it a http link
     if (/^https?:\/\//.test(itemPath)) {

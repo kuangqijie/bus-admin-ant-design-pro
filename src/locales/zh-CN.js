@@ -16,6 +16,8 @@ export default {
   'menu.base.baseinfo':'基本信息',
   'menu.base.location':'城市管理',
   'menu.base.station':'站点设置',
+  'menu.base.carmodel':'车型管理',
+  'menu.base.staffs':'工作人员管理',
 
   'menu.city':'城际巴士',
   'menu.city.order':'订单管理',

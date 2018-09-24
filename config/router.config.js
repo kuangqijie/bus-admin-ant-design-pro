@@ -34,6 +34,8 @@ export default [
           { path: '/base/baseinfo', name:'baseinfo', icon:'profile', component: './Base/Baseinfo' },
           { path: '/base/location', name:'location', icon:'environment', component: './Base/Location' },
           { path: '/base/station', name:'station', icon:'environment', component: './Base/Station' },
+          { path: '/base/carmodel', name:'carmodel', iconfont:'icon-carmodel', component: './Base/CarModel' },
+          { path: '/base/staffs', name:'staffs', icon:'user', component: './Base/Staffs' },
           { component: '404', isCanTurn:true },
         ]
       },

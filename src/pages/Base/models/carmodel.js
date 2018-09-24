@@ -1,17 +1,16 @@
-import {queryStationList, saveStation, queryCityList, deleteStation} from '@/services/base';
+import {queryCarModelList, saveCarModel} from '@/services/base';
 
 export default {
-  namespace: 'station',
+  namespace: 'carmodel',
 
   state: {
     list: [],
     total: 0,
-    cityList:[]
   },
 
   effects: {
     *fetch({ payload }, { call, put }) {
-      const response = yield call(queryStationList, payload);
+      const response = yield call(queryCarModelList, payload);
       console.log(response)
       yield put({
         type: 'save',
@@ -19,7 +18,7 @@ export default {
       });
     },
     *update({ payload, callback }, { call, put }){ //编辑&添加
-      const response = yield call(saveStation, payload);
+      const response = yield call(saveCarModel, payload);
       if(callback) callback();
       
     },
@@ -27,14 +26,7 @@ export default {
       const res = yield call(deleteStation, payload);
       if(callback) callback(res);
     },
-    *fetchCityList({ payload }, { call, put }){ //获取城市列表
-      const response = yield call(queryCityList, payload);
-      console.log(response)
-      yield put({
-        type: 'saveCityList',
-        payload: response,
-      });
-    }
+    
   },
 
   reducers: {
@@ -45,11 +37,5 @@ export default {
         ...payload,
       };
     },
-    saveCityList(state, {payload}){
-      return {
-        ...state,
-        cityList: payload
-      }
-    }
   },
 };

@@ -87,6 +87,20 @@ let routes = [
             "exact": true
           },
           {
+            "path": "/base/carmodel",
+            "name": "carmodel",
+            "iconfont": "icon-carmodel",
+            "component": dynamic({ loader: () => import('../Base/CarModel'), loading: require('F:/project/ant-design-pro/src/components/PageLoading/index').default  }),
+            "exact": true
+          },
+          {
+            "path": "/base/staffs",
+            "name": "staffs",
+            "icon": "user",
+            "component": dynamic({ loader: () => import('../Base/Staffs'), loading: require('F:/project/ant-design-pro/src/components/PageLoading/index').default  }),
+            "exact": true
+          },
+          {
             "component": dynamic({ loader: () => import('../404'), loading: require('F:/project/ant-design-pro/src/components/PageLoading/index').default  }),
             "isCanTurn": true,
             "exact": true
