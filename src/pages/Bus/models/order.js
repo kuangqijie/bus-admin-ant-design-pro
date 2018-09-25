@@ -1,4 +1,4 @@
-import {queryOrderList} from '@/services/city';
+import {queryOrderList} from '@/services/bus';
 
 export default {
   namespace: 'busOrder',

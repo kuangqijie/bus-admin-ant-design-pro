@@ -34,7 +34,7 @@ const formItemLayout = {
 export default
 @connect(({ staffs, loading }) => ({
   staffs,
-  loading: loading.effects['carmodel/fetch'],
+  loading: loading.effects['staffs/fetch'],
 }))
 @Form.create()
 class BaseStaffs extends PureComponent {
@@ -95,7 +95,7 @@ class BaseStaffs extends PureComponent {
   fetchData = (params)=>{
     const { dispatch } = this.props;
     dispatch({
-      type: 'carmodel/fetch',
+      type: 'staffs/fetch',
       payload:{
         pageNum: this.state.pageNum,
         pageSize: this.state.pageSize,
@@ -122,7 +122,10 @@ class BaseStaffs extends PureComponent {
       ...formVals,
       ...filters,
     };
-    this.setState({pageSize:pagination.pageSize})
+    this.setState({
+      pageNum: pagination.current,
+      pageSize:pagination.pageSize
+    })
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
@@ -149,7 +152,7 @@ class BaseStaffs extends PureComponent {
   onDelete = (id)=>{
 
   }
-  
+
   setModal = (b)=>{
     this.setState({isShowModal: b});
   }
@@ -244,13 +247,13 @@ class BaseStaffs extends PureComponent {
         showTotal:t=>'共'+t+'条数据',
       }
     }
-  
+
     return (
       <PageHeaderWrapper>
         <Card bordered={false} className={styles.wrap}>
           <Row className="f-mb20">
             <Col span={6}>
-              <Button type="primary" onClick={()=>this.setModal(true)}>添加车型</Button>
+              <Button type="primary" onClick={()=>this.setModal(true)}>添加工作人员</Button>
             </Col>
             <Col span={10} offset={8} xxl={{ span: 8, offset: 10 }}>
               <Search placeholder="请输入工作人员名称" enterButton
@@ -258,7 +261,7 @@ class BaseStaffs extends PureComponent {
               />
             </Col>
           </Row>
-          
+
 
           <StandardTable
               bordered={true}
@@ -269,7 +272,7 @@ class BaseStaffs extends PureComponent {
               onChange={this.onTableChange}
           />
 
-          <Modal title="添加车型" width={700} visible={this.state.isShowModal} onOk={this.onAdd} onCancel={()=>this.setModal(false)} maskClosable={false} destroyOnClose={true}>
+          <Modal title="添加工作人员" width={700} visible={this.state.isShowModal} onOk={this.onAdd} onCancel={()=>this.setModal(false)} maskClosable={false} destroyOnClose={true}>
             {this.renderForm()}
           </Modal>
         </Card>

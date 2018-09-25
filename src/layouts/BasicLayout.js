@@ -24,7 +24,7 @@ const { check } = Authorized;
 // 将路由器转换为菜单
 function formatter(data, parentPath = '', parentAuthority, parentName) {
   //console.log(parentName)
-  return data.map(item => {
+  return data.filter(item=>item.isCanTurn).map(item => {
     let locale = 'menu';
     if (parentName && item.name) {
       locale = `${parentName}.${item.name}`;
@@ -229,7 +229,7 @@ class BasicLayout extends React.PureComponent {
     const { rendering, isMobile } = this.state;
     const isTop = PropsLayout === 'topmenu';
     //过滤掉无权限路由
-    const menuData = this.getMenuData().filter(item=>item.name && item.isCanTurn);
+    const menuData = this.getMenuData();
     //console.log(menuData)
 
     var matchRes = matchRoutes(menuData, location.pathname);

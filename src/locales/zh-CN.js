@@ -27,6 +27,7 @@ export default {
   'menu.bus':'汽车票',
   'menu.bus.order':'订单管理',
   'menu.bus.orderdetail':'订单详情',
+  'menu.bus.line':'线路管理',
 
   'menu.form': '表单页',
   'menu.form.basicform': '基础表单',

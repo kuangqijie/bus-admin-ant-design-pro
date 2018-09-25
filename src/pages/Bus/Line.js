@@ -2,19 +2,17 @@ import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'dva';
 import Link from 'umi/link';
 
-import {Popconfirm, Row, Col, Card, Form, Input, InputNumber, Select, Icon, Button,  Modal, message, Radio, Badge,Tree } from 'antd';
+import {Popconfirm, Row, Col, Card, Form, Input, InputNumber, Select, Icon, Button,  Modal, message, Radio, Badge, Tag } from 'antd';
 import StandardTable from '@/components/StandardTable';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 
-import styles from './Role.less';
+import styles from './Line.less';
 
 const FormItem = Form.Item;
 
 const { TextArea, Search } = Input;
 const { Option } = Select;
 const RadioGroup = Radio.Group;
-const TreeNode = Tree.TreeNode;
-
 const getValue = obj =>
   Object.keys(obj)
     .map(key => obj[key])
@@ -24,107 +22,22 @@ const statusText = {
   '1':'启用',
   '2':'停用'
 }
-
+const sexText = {
+  '1':'男',
+  '2':'女'
+}
 const formItemLayout = {
   labelCol: { span: 8 },
   wrapperCol: { span: 16 },
 }
 
-
-class RightsSet extends PureComponent{
-  state = {
-    //expandedKeys: ['0-0-0', '0-0-1'],
-    autoExpandParent: true,
-    //checkedKeys: ['0-0-0'], //选中复选框的树节点
-    selectedKeys: [], //设置选中的树节点
-  }
-
-  treeData = [
-    {
-      title: '平台管理',
-      key: '0-0',
-      children: [
-        { title: '角色管理', key: '0-0-0' },
-        { title: '用户管理', key: '0-0-1' },
-      ],
-    },
-    {
-      title: '基础设置',
-      key: '0-1',
-      children: [
-        { title: '基本信息', key: '0-1-0' },
-        { title: '城市管理', key: '0-1-1' },
-        { title: '站点设置', key: '0-1-2' },
-        { title: '车型管理', key: '0-1-3' },
-      ],
-    },
-    {
-      title: '汽车票',
-      key: '0-2',
-      children: [
-        { title: '订单管理', key: '0-2-0' },
-      ],
-    },
-  ];
-
-  onExpand = (expandedKeys) => {
-    console.log('onExpand', expandedKeys);
-    // if not set autoExpandParent to false, if children expanded, parent can not collapse.
-    // or, you can remove all expanded children keys.
-    this.setState({
-      expandedKeys,
-      autoExpandParent: false,
-    });
-  }
-
-  onCheck = (checkedKeys) => {
-    console.log('onCheck', checkedKeys);
-    this.setState({ checkedKeys });
-  }
-
-  onSelect = (selectedKeys, info) => {
-    console.log('onSelect', info);
-    this.setState({ selectedKeys });
-  }
-
-  renderTreeNodes = (data) => {
-    return data.map((item) => {
-      if (item.children) {
-        return (
-          <TreeNode title={item.title} key={item.key} dataRef={item}>
-            {this.renderTreeNodes(item.children)}
-          </TreeNode>
-        );
-      }
-      return <TreeNode {...item} />;
-    });
-  }
-
-  render() {
-    return (
-      <Tree
-        checkable
-        onExpand={this.onExpand}
-        expandedKeys={this.state.expandedKeys}
-        autoExpandParent={this.state.autoExpandParent}
-        onCheck={this.onCheck}
-        checkedKeys={this.state.checkedKeys}
-        onSelect={this.onSelect}
-        selectedKeys={this.state.selectedKeys}
-      >
-        {this.renderTreeNodes(this.treeData)}
-      </Tree>
-    );
-  }
-}
-
 export default
-@connect(({ role, loading }) => ({
-  role,
-  loading: loading.effects['role/fetch'],
+@connect(({ line, loading }) => ({
+  line,
+  loading: loading.effects['line/fetch'],
 }))
 @Form.create()
-class BaseStaffs extends PureComponent {
+class BusLine extends PureComponent {
   state = {
     isShowModal: false, //是否显示弹窗
     formVals: {},
@@ -132,10 +45,8 @@ class BaseStaffs extends PureComponent {
     pageNum: 1,
   };
 
-  isEdit = false //是否是编辑
-
   componentDidMount() {
-    this.fetchData();
+    //this.fetchData();
   }
 
   columns = [
@@ -156,8 +67,12 @@ class BaseStaffs extends PureComponent {
         }
       },
     },
-    { title: '角色名称', dataIndex: 'name' },
-    { title: '备注信息', dataIndex: 'content' },
+    { title: '线路名称', dataIndex: 'name' },
+    { title: '起点站', dataIndex: 'startPlaceName' },
+    { title: '终点站', dataIndex: 'endPlaceName', },
+    { title: '里程数(KM)', dataIndex: 'mileage', },
+    { title: '时长(H)', dataIndex: 'spendTime', },
+    { title: '标签', dataIndex: 'tag', render:(v)=>v && <Tag>{v}</Tag> },
     {
       title: '操作',
       dataIndex: 'operate',
@@ -180,7 +95,7 @@ class BaseStaffs extends PureComponent {
   fetchData = (params)=>{
     const { dispatch } = this.props;
     dispatch({
-      type: 'role/fetch',
+      type: 'line/fetch',
       payload:{
         pageNum: this.state.pageNum,
         pageSize: this.state.pageSize,
@@ -207,7 +122,10 @@ class BaseStaffs extends PureComponent {
       ...formVals,
       ...filters,
     };
-    this.setState({pageSize:pagination.pageSize})
+    this.setState({
+      pageNum: pagination.current,
+      pageSize:pagination.pageSize
+    })
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
@@ -225,16 +143,8 @@ class BaseStaffs extends PureComponent {
       this.setModal(false);
     })
   }
-
-  //显示添加弹窗
-  onShowAddModel = ()=>{
-    this.isEdit = false;
-    this.setModal(true);
-  }
-
   //列表编辑
   onEdit = (record)=>{
-    this.isEdit = true;
     this.setState({formVals: record})
     this.setModal(true)
   }
@@ -264,32 +174,76 @@ class BaseStaffs extends PureComponent {
 
     return (
       <Form layout="horizontal">
-        <FormItem label="角色名称" labelCol={{span:4}} wrapperCol={{span:20}}>
-          {getFieldDecorator('name',{
-            initialValue:formVals.name,
-            rules: [{ required: true, message: '请输入角色名称!', }],
-          })(<Input placeholder="请输入角色名称" />)}
-        </FormItem>
-        <FormItem label="备注信息" labelCol={{span:4}} wrapperCol={{span:20}}>
-          {getFieldDecorator('content',{
-            initialValue:formVals.content,
-          })(<TextArea placeholder="请输入备注信息" />)}
-        </FormItem>
-        <FormItem label="权限设置" labelCol={{span:4}} wrapperCol={{span:20}}>
-          <RightsSet />
-        </FormItem>
-
+        <Row>
+          <Col>
+            <FormItem label="类别" labelCol={{span:4}} wrapperCol={{span:20}}>
+              {getFieldDecorator('category',{
+                initialValue:formVals.category,
+                rules: [{ required: true, message: '请选择类别!', }],
+              })(
+                <RadioGroup onChange={this.onChangeCate}>
+                  <Radio value={1}>大车</Radio>
+                  <Radio value={2}>小车</Radio>
+                </RadioGroup>
+              )}
+            </FormItem>
+          </Col>
+        </Row>
+        <Row>
+          <Col span={12}>
+            <FormItem label="车辆类型" {...formItemLayout}>
+              {getFieldDecorator('busType',{
+                initialValue:formVals.busType,
+                rules: [{ required: true, message: '请选择车辆类型!', }],
+              })(
+                <Select placeholder="请选择">
+                  <Option value="1">点</Option>
+                  <Option value="2">面</Option>
+                </Select>
+              )}
+            </FormItem>
+          </Col>
+          <Col span={12}>
+            <FormItem label="品牌" {...formItemLayout}>
+              {getFieldDecorator('brand',{
+                initialValue:formVals.brand,
+                rules: [{ required: true, message: '请输入品牌!', }],
+              })(<Input placeholder="请输入品牌" />)}
+            </FormItem>
+          </Col>
+        </Row>
+        <Row>
+          <Col span={12}>
+            <FormItem label="核定座数" {...formItemLayout}>
+              {getFieldDecorator('cofirmSeatsCount',{
+                initialValue:formVals.cofirmSeatsCount,
+                rules: [{ required: true, message: '请输入核定座数!', }],
+              })(<Input placeholder="请输入核定座数" />)}
+            </FormItem>
+          </Col>
+          <Col span={12}>
+            <FormItem label="乘客座数" {...formItemLayout}>
+              {getFieldDecorator('passengerSeatsCount',{
+                initialValue:formVals.passengerSeatsCount,
+                rules: [{ required: true, message: '请输入乘客座数!', }],
+              })(<Input placeholder="请输入乘客座数" />)}
+            </FormItem>
+          </Col>
+        </Row>
       </Form>
     )
   }
 
   render() {
-    const { role, loading, } = this.props;
-    //console.log(role)
+    const { order, loading, } = this.props;
+    //console.log(order)
     const data = {
-      list: role.list,
+      list: [
+        {id:1, status:1, name:'川藏线', startPlaceName:'长沙汽车西站', endPlaceName:'大同', mileage:'656', spendTime:'12', tag:'免票', },
+
+      ],
       pagination: {
-        total:role.total,
+        total:1,
         showTotal:t=>'共'+t+'条数据',
       }
     }
@@ -299,10 +253,10 @@ class BaseStaffs extends PureComponent {
         <Card bordered={false} className={styles.wrap}>
           <Row className="f-mb20">
             <Col span={6}>
-              <Button type="primary" onClick={()=>this.onShowAddModel()}>添加角色</Button>
+              <Button type="primary" onClick={()=>this.setModal(true)}>添加线路</Button>
             </Col>
             <Col span={10} offset={8} xxl={{ span: 8, offset: 10 }}>
-              <Search placeholder="请输入角色名称" enterButton
+              <Search placeholder="请输入线路名称" enterButton
                 onSearch={(v)=>this.onSearch(v)}
               />
             </Col>
@@ -318,7 +272,7 @@ class BaseStaffs extends PureComponent {
               onChange={this.onTableChange}
           />
 
-          <Modal title={this.isEdit?'编辑角色':'添加角色'} width={500} visible={this.state.isShowModal} onOk={this.onAdd} onCancel={()=>this.setModal(false)} maskClosable={false} destroyOnClose={true}>
+          <Modal title="添加线路" width={700} visible={this.state.isShowModal} onOk={this.onAdd} onCancel={()=>this.setModal(false)} maskClosable={false} destroyOnClose={true}>
             {this.renderForm()}
           </Modal>
         </Card>

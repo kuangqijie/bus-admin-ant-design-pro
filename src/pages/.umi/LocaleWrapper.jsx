@@ -15,13 +15,13 @@ const defaultAntd = require('antd/lib/locale-provider/zh_CN');
 
 const localeInfo = {
   'en-US': {
-    messages: require('F:/project/ant-design-pro/src/locales/en-US.js').default,
+    messages: require('E:/bus-admin/ant-design-pro-master/src/locales/en-US.js').default,
     locale: 'en-US',
     antd: require('antd/lib/locale-provider/en_US'),
     data: require('react-intl/locale-data/en'),
   },
   'zh-CN': {
-    messages: require('F:/project/ant-design-pro/src/locales/zh-CN.js').default,
+    messages: require('E:/bus-admin/ant-design-pro-master/src/locales/zh-CN.js').default,
     locale: 'zh-CN',
     antd: require('antd/lib/locale-provider/zh_CN'),
     data: require('react-intl/locale-data/zh'),
