@@ -3,9 +3,21 @@ import { connect } from 'dva';
 import { Card, Badge, Table, Divider, Button } from 'antd';
 import DescriptionList from '@/components/DescriptionList';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import {getPageQuery} from '@/utils/utils';
 import styles from './OrderDetail.less';
 
 const { Description } = DescriptionList;
+
+const orderStatus = {
+  1:'订单新建',
+  2:'订单已超时',
+  3:'订单已取消',
+  4:'订单出票中',
+  5:'订单成功',
+  6:'订单失败',
+  7:'订单已退票',
+  8:'订单异常'
+}
 
 //保险信息col
 const progressColumns = [
@@ -32,23 +44,55 @@ const progressColumns = [
     dataIndex: 'operate',
   },
 ];
+//乘客信息col
+const passengerColumns = [
+  {title:'乘客名', dataIndex:'name'},
+  {title:'证件', dataIndex:'certificateNo'},
+  {title:'联系电话', dataIndex:'mobilePhone'},
+]
 
 export default
-@connect(({ orderDetail, loading }) => ({
-  orderDetail,
-  loading: loading.effects['orderDetail/fetch'],
+@connect(({ cityOrderDetail, loading }) => ({
+  orderDetail:cityOrderDetail,
+  loading: loading.effects['cityOrderDetail/fetch'],
 }))
-class OrderDetail extends Component {
+class CityOrderDetail extends Component {
   componentDidMount() {
     const { dispatch } = this.props;
+    const options = getPageQuery();
     dispatch({
-      type: 'orderDetail/fetch',
-      payload:{id:2}
+      type: 'cityOrderDetail/fetch',
+      payload:{...options}
     });
   }
 
   render() {
-    const { loading, orderDetail:{orderInfo, stationInfo, messageList, insuranceInfo} } = this.props;
+    const { loading, orderDetail:OD } = this.props;
+
+    let orderInfo = [
+      { key: '订单状态', val: orderStatus[OD.orderStatus] },
+      { key: '出发日期', val: OD.startDate },
+      { key: '出发时间', val: OD.startTime },
+      { key: '出发站', val: OD.startStationName },
+      { key: '到达站', val: OD.endStationName },
+      { key: '支付总金额', val: OD.totalMoney },
+      { key: '票价总金额', val: OD.totalMoney },
+      { key: '差额退款', val: '0' },
+      { key: '订单号', val: OD.orderNo },
+      { key: '保险价格', val: OD.insurancePrice },
+      { key: '退票状态', val: '' },
+      { key: '取票状态', val: '' },
+    ];
+
+    let stationInfo = [
+      { key: '车站名', val: '' },
+      { key: '车站地址', val: '' },
+      { key: '联系电话', val: '' },
+    ];
+    let messageList = [];
+    let insuranceInfo = [];
+
+
 
     //订单信息
     const renderOrderInfo = ()=>{
@@ -70,6 +114,17 @@ class OrderDetail extends Component {
             {renderOrderInfo()}
           </DescriptionList>
           <Divider style={{ marginBottom: 32 }} />
+
+          <div className={styles.title}>乘客信息</div>
+          <Table
+            bordered
+            style={{ marginBottom: 30 }}
+            pagination={false}
+            loading={loading}
+            dataSource={OD.passengerInfo}
+            columns={passengerColumns}
+            rowKey='name'
+          />
 
           <DescriptionList size="large" col={4} title="车站信息" style={{ marginBottom: 32 }}>
             {renderStationInfo()}

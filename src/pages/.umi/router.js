@@ -32,11 +32,13 @@ let routes = [
     "Routes": [require('../Authorized').default],
     "routes": [
       {
+        "id": 1,
         "path": "/platform",
         "icon": "form",
         "name": "platform",
         "routes": [
           {
+            "id": 100,
             "path": "/platform/role",
             "name": "role",
             "icon": "team",
@@ -44,6 +46,7 @@ let routes = [
             "exact": true
           },
           {
+            "id": 101,
             "path": "/platform/user",
             "name": "user",
             "icon": "user",
@@ -61,11 +64,13 @@ let routes = [
         ]
       },
       {
+        "id": 2,
         "path": "/base",
         "icon": "setting",
         "name": "base",
         "routes": [
           {
+            "id": 200,
             "path": "/base/baseinfo",
             "name": "baseinfo",
             "icon": "profile",
@@ -73,6 +78,7 @@ let routes = [
             "exact": true
           },
           {
+            "id": 201,
             "path": "/base/location",
             "name": "location",
             "icon": "environment",
@@ -80,6 +86,7 @@ let routes = [
             "exact": true
           },
           {
+            "id": 202,
             "path": "/base/station",
             "name": "station",
             "icon": "environment",
@@ -87,6 +94,7 @@ let routes = [
             "exact": true
           },
           {
+            "id": 203,
             "path": "/base/carmodel",
             "name": "carmodel",
             "iconfont": "icon-carmodel",
@@ -94,6 +102,7 @@ let routes = [
             "exact": true
           },
           {
+            "id": 204,
             "path": "/base/staffs",
             "name": "staffs",
             "icon": "user",
@@ -111,6 +120,7 @@ let routes = [
         ]
       },
       {
+        "id": 3,
         "path": "/city",
         "iconfont": "icon-city",
         "name": "city",
@@ -123,10 +133,10 @@ let routes = [
             "exact": true
           },
           {
-            "path": "/city/order/detail/:id",
+            "path": "/city/order/detail",
             "hideInMenu": true,
             "name": "orderdetail",
-            "component": dynamic({ loader: () => import('../City/OrderDetail/$id.js'), loading: require('E:/bus-admin/ant-design-pro-master/src/components/PageLoading/index').default  }),
+            "component": dynamic({ loader: () => import('../City/OrderDetail'), loading: require('E:/bus-admin/ant-design-pro-master/src/components/PageLoading/index').default  }),
             "exact": true
           },
           {
@@ -147,6 +157,7 @@ let routes = [
         ]
       },
       {
+        "id": 4,
         "path": "/bus",
         "iconfont": "icon-bus",
         "name": "bus",
@@ -163,13 +174,6 @@ let routes = [
             "hideInMenu": true,
             "name": "orderdetail",
             "component": dynamic({ loader: () => import('../Bus/OrderDetail'), loading: require('E:/bus-admin/ant-design-pro-master/src/components/PageLoading/index').default  }),
-            "exact": true
-          },
-          {
-            "path": "/bus/line",
-            "name": "line",
-            "icon": "branches",
-            "component": dynamic({ loader: () => import('../Bus/Line'), loading: require('E:/bus-admin/ant-design-pro-master/src/components/PageLoading/index').default  }),
             "exact": true
           },
           {
@@ -263,6 +267,11 @@ let routes = [
             "path": "/exception/500",
             "name": "server-error",
             "component": dynamic({ loader: () => import('../Exception/500'), loading: require('E:/bus-admin/ant-design-pro-master/src/components/PageLoading/index').default  }),
+            "isCanTurn": true,
+            "exact": true
+          },
+          {
+            "component": dynamic({ loader: () => import('../404'), loading: require('E:/bus-admin/ant-design-pro-master/src/components/PageLoading/index').default  }),
             "isCanTurn": true,
             "exact": true
           },

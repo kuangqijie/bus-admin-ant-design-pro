@@ -3,7 +3,7 @@ import Link from 'umi/link';
 import { Icon } from 'antd';
 import GlobalFooter from '@/components/GlobalFooter';
 import styles from './UserLayout.less';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo.png';
 
 const links = [
   {
@@ -54,11 +54,11 @@ class UserLayout extends React.PureComponent {
                 <span className={styles.title}>欢迎登陆</span>
               </Link>
             </div>
-            <div className={styles.desc}>来一场说走就走的旅行</div>
+
           </div>
           {children}
         </div>
-        <GlobalFooter links={links} copyright={copyright} />
+
       </div>
     );
   }

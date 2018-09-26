@@ -1,7 +1,7 @@
-import {queryOrderList} from '@/services/city';
+import {queryOrderList} from '@/services/bus';
 
 export default {
-  namespace: 'order',
+  namespace: 'cityOrder',
 
   state: {
     list: [],
@@ -21,7 +21,7 @@ export default {
 
   reducers: {
     save(state, {payload}) {
-
+      console.log(payload)
       return {
         ...state,
         ...payload,

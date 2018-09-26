@@ -1,4 +1,4 @@
-import {queryLineList, saveLine, deleteLine} from '@/services/bus';
+import {queryLineList, saveLine, deleteLine} from '@/services/city';
 
 export default {
   namespace: 'line',

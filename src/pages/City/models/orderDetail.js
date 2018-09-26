@@ -1,7 +1,7 @@
-import {queryOrderDetail} from '@/services/city';
+import {queryOrderDetail} from '@/services/bus';
 
 export default {
-  namespace: 'orderDetail',
+  namespace: 'cityOrderDetail',
 
   state: {
     orderInfo: [],
@@ -36,14 +36,14 @@ export default {
       //console.log(response)
       yield put({
         type: 'save',
-        payload: response,
+        payload: response.data,
       });
     },
   },
 
   reducers: {
     save(state, {payload}) {
-
+      console.log(payload)
       return {
         ...state,
         ...payload,

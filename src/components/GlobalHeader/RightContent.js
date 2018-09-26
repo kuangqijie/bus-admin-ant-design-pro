@@ -49,7 +49,7 @@ export default class GlobalHeaderRight extends PureComponent {
     } = this.props;
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
-        <Menu.Item key="userCenter">
+        {/* <Menu.Item key="userCenter">
           <Icon type="user" />
           <FormattedMessage id="menu.account.center" defaultMessage="account center" />
         </Menu.Item>
@@ -61,7 +61,7 @@ export default class GlobalHeaderRight extends PureComponent {
           <Icon type="close-circle" />
           <FormattedMessage id="menu.account.trigger" defaultMessage="Trigger Error" />
         </Menu.Item>
-        <Menu.Divider />
+        <Menu.Divider /> */}
         <Menu.Item key="logout">
           <Icon type="logout" />
           退出登录
@@ -75,8 +75,8 @@ export default class GlobalHeaderRight extends PureComponent {
     }
     return (
       <div className={className}>
-        
-        <NoticeIcon
+
+        {/* <NoticeIcon
           className={styles.action}
           count={currentUser.notifyCount}
           onItemClick={(item, tabProps) => {
@@ -105,7 +105,7 @@ export default class GlobalHeaderRight extends PureComponent {
             emptyText="你已完成所有待办"
             emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
           />
-        </NoticeIcon>
+        </NoticeIcon> */}
         {currentUser.name ? (
           <Dropdown overlay={menu}>
             <span className={`${styles.action} ${styles.account}`}>

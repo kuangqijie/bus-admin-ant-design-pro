@@ -21,9 +21,9 @@ app.model({ namespace: 'role', ...(require('E:/bus-admin/ant-design-pro-master/s
 app.model({ namespace: 'carmodel', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/Base/models/carmodel.js').default) });
 app.model({ namespace: 'staffs', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/Base/models/staffs.js').default) });
 app.model({ namespace: 'station', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/Base/models/station.js').default) });
+app.model({ namespace: 'line', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/City/models/line.js').default) });
 app.model({ namespace: 'order', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/City/models/order.js').default) });
 app.model({ namespace: 'orderDetail', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/City/models/orderDetail.js').default) });
-app.model({ namespace: 'line', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/Bus/models/line.js').default) });
 app.model({ namespace: 'order', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/Bus/models/order.js').default) });
 app.model({ namespace: 'orderDetail', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/Bus/models/orderDetail.js').default) });
 app.model({ namespace: 'rule', ...(require('E:/bus-admin/ant-design-pro-master/src/pages/List/models/rule.js').default) });

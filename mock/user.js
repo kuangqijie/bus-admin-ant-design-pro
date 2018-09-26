@@ -15,11 +15,12 @@ export default {
         {type:2, path:'/base/staffs'},
         {type:1, path:'/city'},
         {type:2, path:'/city/order'},
-        {type:3, path:'/city/order/detail/:id'},
+        {type:3, path:'/city/order/detail'},
+        {type:2, path:'/city/line'},
         {type:1, path:'/bus'},
         {type:2, path:'/bus/order'},
         {type:3, path:'/bus/order/detail'},
-        {type:2, path:'/bus/line'},
+
       ])
     },1000)
 

@@ -11,7 +11,7 @@ import { enquireScreen, unenquireScreen } from 'enquire-js';
 import { formatMessage } from 'umi/locale';
 import SiderMenu from '@/components/SiderMenu';
 import Authorized from '@/utils/Authorized';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo.png';
 import Footer from './Footer';
 import Header from './Header';
 import Context from './MenuContext';
@@ -230,7 +230,7 @@ class BasicLayout extends React.PureComponent {
     const isTop = PropsLayout === 'topmenu';
     //过滤掉无权限路由
     const menuData = this.getMenuData();
-    //console.log(menuData)
+    console.log(menuData)
 
     var matchRes = matchRoutes(menuData, location.pathname);
     var filterMenu = []; //左侧二级菜单

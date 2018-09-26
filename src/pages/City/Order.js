@@ -35,9 +35,9 @@ const orderStatus = {
 }
 
 export default
-@connect(({ order, loading }) => ({
-  order,
-  loading: loading.effects['order/fetch'],
+@connect(({ cityOrder, loading }) => ({
+  order: cityOrder,
+  loading: loading.effects['cityOrder/fetch'],
 }))
 @Form.create()
 class CityOrder extends PureComponent {
@@ -46,6 +46,7 @@ class CityOrder extends PureComponent {
     selectedRows: [],
     formValues: {},
     expandForm: false,
+    pageSize: 10
   };
 
   componentDidMount() {
@@ -88,7 +89,7 @@ class CityOrder extends PureComponent {
         return (
           <Fragment>
             <a className="f-mr10" onClick={()=>this.setRefundModal(true)}>退票</a>
-            <Link to={`/city/order/detail/1`}>订单详情</Link>
+            <Link to={`/bus/order/detail?orderNo=${record.orderNo}`}>订单详情</Link>
           </Fragment>
         )
       },
@@ -99,25 +100,16 @@ class CityOrder extends PureComponent {
   fetchData = (params)=>{
     const { dispatch } = this.props;
     dispatch({
-      type: 'order/fetch',
+      type: 'cityOrder/fetch',
       payload:{
-        token:'@lkjkadf@456',
+        pageSize: this.state.pageSize,
         ...params,
-        pageSize: 10,
       }
     });
   }
-  //展开查询表单
-  toggleForm = () => {
-    const { expandForm } = this.state;
-    this.setState({
-      expandForm: !expandForm,
-    });
-  };
 
   //表格change 分页、排序、筛选变化时触发
   onTableChange = (pagination, filtersArg, sorter) => {
-    const { dispatch } = this.props;
     const { formValues } = this.state;
 
     const filters = Object.keys(filtersArg).reduce((obj, key) => {
@@ -125,13 +117,16 @@ class CityOrder extends PureComponent {
       newObj[key] = getValue(filtersArg[key]);
       return newObj;
     }, {});
+
     //console.log(filters)
     //console.log(pagination)
     const params = {
       pageNum: pagination.current,
+      pageSize: pagination.pageSize,
       ...formValues,
       ...filters,
     };
+    this.setState({pageSize:pagination.pageSize})
     if (sorter.field) {
       params.sorter = `${sorter.field}_${sorter.order}`;
     }
@@ -140,16 +135,13 @@ class CityOrder extends PureComponent {
   };
 
   //重置
-  handleFormReset = () => {
+  onFormReset = () => {
     const { form, dispatch } = this.props;
     form.resetFields();
     this.setState({
       formValues: {},
     });
-    dispatch({
-      type: 'rule/fetch',
-      payload: {},
-    });
+    this.fetchData({pageNum:1});
   };
 
   //设置已选中的行
@@ -180,26 +172,33 @@ class CityOrder extends PureComponent {
   //搜索
   onSearch = e => {
     e.preventDefault();
-
     const { dispatch, form } = this.props;
 
     form.validateFields((err, fieldsValue) => {
       console.log(fieldsValue)
       if (err) return;
 
+      //解析时间
+      var orderTime = {} //下车时间
+      if(fieldsValue.orderTime){
+        orderTime.beginDate = fieldsValue.orderTime[0].format('YYYY-MM-DD')
+        orderTime.endDate = fieldsValue.orderTime[1].format('YYYY-MM-DD')
+      }
+      var startTime = {} //发车时间
+      if(fieldsValue.startTime){
+        startTime.departureDate = fieldsValue.startTime[0].format('YYYY-MM-DD')
+        startTime.arriveDate = fieldsValue.startTime[1].format('YYYY-MM-DD')
+      }
+
       const values = {
         ...fieldsValue,
-        updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
       };
 
       this.setState({
         formValues: values,
       });
 
-      dispatch({
-        type: 'order/fetch',
-        payload: values,
-      });
+      this.fetchData({pageNum:1, ...values, ...orderTime, ...startTime})
     });
   };
 
@@ -209,7 +208,28 @@ class CityOrder extends PureComponent {
     });
   };
 
-  //查询表单
+  //展开查询表单
+  toggleForm = () => {
+    const { expandForm } = this.state;
+    this.setState({
+      expandForm: !expandForm,
+    });
+  };
+
+  //订单状态select
+  renderSelectStatus(){
+    var opts = [];
+    for(let k in orderStatus){
+      opts.push(<Option value={k} key={k}>{orderStatus[k]}</Option>)
+    }
+    return (
+      <Select placeholder="请选择" style={{ width: '100%' }}>
+        {opts}
+      </Select>
+    )
+  }
+
+  //查询表单(默认表单)
   renderSimpleForm() {
     const {
       form: { getFieldDecorator },
@@ -217,48 +237,35 @@ class CityOrder extends PureComponent {
     return (
       <Form onSubmit={this.onSearch} layout="inline">
         <Row gutter={{ md: 8, xl:16, xxl:24 }}>
-          <Col span={5}>
+          <Col span={6}>
             <FormItem label="订单状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="1">已支付</Option>
-                  <Option value="2">已关闭</Option>
-                  <Option value="3">全部退票</Option>
-                </Select>
+              {getFieldDecorator('orderStatus')(
+                this.renderSelectStatus()
               )}
             </FormItem>
           </Col>
           <Col span={6}>
-            <FormItem label="关键字">
-              {getFieldDecorator('name')(<Input placeholder="请输入手机或身份证号" />)}
+            <FormItem label="订单号">
+              {getFieldDecorator('orderNo')(<Input placeholder="请输入订单号" />)}
             </FormItem>
           </Col>
-          <Col span={7}>
-            <FormItem label="下单日期">
-              {getFieldDecorator('date')(
-                <RangePicker style={{ width: '100%' }} />
-              )}
+          <Col span={6}>
+            <FormItem label="手机号">
+              {getFieldDecorator('mobilePhone')(<Input placeholder="请输入手机号" />)}
             </FormItem>
           </Col>
-
           <Col span={6}>
             <div style={{ marginBottom: 24 }}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <Button type="primary" style={{ marginLeft: 8 }} onClick={this.onExportExcel}>
-                导出
-              </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-                展开 <Icon type="down" />
-              </a>
+              <Button type="primary" htmlType="submit" className="f-mr10">查询</Button>
+              <Button type="primary" className="f-mr10" onClick={this.onFormReset}>重置</Button>
+              <a onClick={this.toggleForm}> 展开 <Icon type="down" /> </a>
             </div>
           </Col>
         </Row>
       </Form>
     );
   }
-
+  //查询表单(展开表单)
   renderAdvancedForm(){
     const {
       form: { getFieldDecorator },
@@ -266,78 +273,50 @@ class CityOrder extends PureComponent {
     return (
       <Form onSubmit={this.onSearch} layout="inline">
         <Row gutter={{ md: 8, xl:16, xxl:24 }}>
-          <Col span={5}>
+          <Col span={6}>
             <FormItem label="订单状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="1">已支付</Option>
-                  <Option value="2">已关闭</Option>
-                  <Option value="3">全部退票</Option>
-                </Select>
+              {getFieldDecorator('orderStatus')(
+                this.renderSelectStatus()
               )}
             </FormItem>
           </Col>
           <Col span={6}>
-            <FormItem label="关键字">
-              {getFieldDecorator('name')(<Input placeholder="请输入手机或身份证号" />)}
+            <FormItem label="订单号">
+              {getFieldDecorator('orderNo')(<Input placeholder="请输入订单号" />)}
             </FormItem>
           </Col>
-          <Col span={7}>
-            <FormItem label="下单日期">
-              {getFieldDecorator('date')(
-                <RangePicker style={{ width: '100%' }} />
-              )}
-            </FormItem>
-          </Col>
-
           <Col span={6}>
-            <FormItem label="订单状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="1">已支付</Option>
-                  <Option value="2">已关闭</Option>
-                  <Option value="3">全部退票</Option>
-                </Select>
-              )}
+            <FormItem label="手机号">
+              {getFieldDecorator('mobilePhone')(<Input placeholder="请输入手机号" />)}
+            </FormItem>
+          </Col>
+          <Col span={6}>
+            <FormItem label="身份证">
+              {getFieldDecorator('certificateNo')(<Input placeholder="请输入取票人身份证" />)}
             </FormItem>
           </Col>
         </Row>
         <Row gutter={{ md: 8, xl:16, xxl:24 }}>
-          <Col span={5}>
-            <FormItem label="订单状态">
-              {getFieldDecorator('status')(
-                <Select placeholder="请选择" style={{ width: '100%' }}>
-                  <Option value="1">已支付</Option>
-                  <Option value="2">已关闭</Option>
-                  <Option value="3">全部退票</Option>
-                </Select>
-              )}
-            </FormItem>
-          </Col>
-          <Col span={6}>
-            <FormItem label="关键字">
-              {getFieldDecorator('name')(<Input placeholder="请输入手机或身份证号" />)}
-            </FormItem>
-          </Col>
-          <Col span={7}>
-            <FormItem label="下单日期">
-              {getFieldDecorator('date')(
+          <Col span={8}>
+            <FormItem label="下单时间">
+              {getFieldDecorator('orderTime')(
                 <RangePicker style={{ width: '100%' }} />
               )}
             </FormItem>
           </Col>
-
-          <Col span={6}>
+          <Col span={8}>
+            <FormItem label="发车时间">
+              {getFieldDecorator('startTime')(
+                <RangePicker style={{ width: '100%' }} />
+              )}
+            </FormItem>
+          </Col>
+          <Col span={8}>
             <div style={{ marginBottom: 24 }}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <Button type="primary" style={{ marginLeft: 8 }} onClick={this.onExportExcel}>
-                导出
-              </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
-              收起 <Icon type="up" />
-              </a>
+              <Button type="primary" htmlType="submit" className="f-mr10">查询</Button>
+              <Button type="primary" className="f-mr10" onClick={this.onFormReset}>重置</Button>
+              <Button type="primary" className="f-mr10" onClick={this.onExportExcel}>导出</Button>
+              <a onClick={this.toggleForm}> 收起 <Icon type="up" /></a>
             </div>
           </Col>
         </Row>
@@ -363,7 +342,7 @@ class CityOrder extends PureComponent {
 
   render() {
     const { order, loading, } = this.props;
-    console.log(order)
+    //console.log(order)
     const data = {
       list: order.list,
       pagination: {

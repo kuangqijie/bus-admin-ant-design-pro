@@ -1,6 +1,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'dva';
 import Link from 'umi/link';
+import router from 'umi/router';
 
 import {Popconfirm, Row, Col, Card, Form, Input, InputNumber, Select, Icon, Button,  Modal, message, Radio, Badge,Tree } from 'antd';
 import StandardTable from '@/components/StandardTable';
@@ -101,6 +102,7 @@ class RightsSet extends PureComponent{
   }
 
   render() {
+
     return (
       <Tree
         checkable
@@ -285,7 +287,7 @@ class BaseStaffs extends PureComponent {
 
   render() {
     const { role, loading, } = this.props;
-    //console.log(role)
+    console.log(router)
     const data = {
       list: role.list,
       pagination: {

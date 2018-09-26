@@ -16,49 +16,52 @@ export default [
     Routes: ['src/pages/Authorized'], //权限路由
     routes: [
       {
+        id:1,
         path:'/platform',
         icon:'form',
         name:'platform',
         //authority:['admin'],
         routes:[
-          { path: '/platform/role', name:'role',icon:'team', component: './Platform/Role' },
-          { path: '/platform/user', name:'user',icon:'user', component: './Platform/User' },
+          { id:100, path: '/platform/role', name:'role',icon:'team', component: './Platform/Role' },
+          { id:101, path: '/platform/user', name:'user',icon:'user', component: './Platform/User' },
           { component: '404', isCanTurn:true },
         ]
       },
       {
+        id:2,
         path:'/base',
         icon:'setting',
         name:'base',
         routes:[
-          { path: '/base/baseinfo', name:'baseinfo', icon:'profile', component: './Base/Baseinfo' },
-          { path: '/base/location', name:'location', icon:'environment', component: './Base/Location' },
-          { path: '/base/station', name:'station', icon:'environment', component: './Base/Station' },
-          { path: '/base/carmodel', name:'carmodel', iconfont:'icon-carmodel', component: './Base/CarModel' },
-          { path: '/base/staffs', name:'staffs', icon:'user', component: './Base/Staffs' },
+          { id:200, path: '/base/baseinfo', name:'baseinfo', icon:'profile', component: './Base/Baseinfo' },
+          { id:201, path: '/base/location', name:'location', icon:'environment', component: './Base/Location' },
+          { id:202, path: '/base/station', name:'station', icon:'environment', component: './Base/Station' },
+          { id:203, path: '/base/carmodel', name:'carmodel', iconfont:'icon-carmodel', component: './Base/CarModel' },
+          { id:204, path: '/base/staffs', name:'staffs', icon:'user', component: './Base/Staffs' },
           { component: '404', isCanTurn:true },
         ]
       },
       {
+        id:3,
         path:'/city',
         iconfont:'icon-city',
         name:'city',
         routes:[
           { path: '/city/order', name:'order', icon:'shopping-cart', component: './City/Order', },
-          { path: '/city/order/detail/:id', hideInMenu:true, name:'orderdetail', component: './City/OrderDetail/$id.js' },
+          { path: '/city/order/detail', hideInMenu:true, name:'orderdetail', component: './City/OrderDetail' },
           { path: '/city/line', name:'line', icon:'branches', component: './City/Line' },
           { component: '404', isCanTurn:true },
         ]
       },
 
       {
+        id:4,
         path:'/bus',
         iconfont:'icon-bus', //自定义图标
         name:'bus',
         routes:[
           { path: '/bus/order', name:'order', icon:'shopping-cart', component: './Bus/Order', },
           { path: '/bus/order/detail', hideInMenu:true, name:'orderdetail', component: './Bus/OrderDetail' },
-          { path: '/bus/line', name:'line', icon:'branches', component: './Bus/Line' },
           { component: '404', isCanTurn:true },
         ]
       },
@@ -135,7 +138,8 @@ export default [
             name: 'server-error',
             component: './Exception/500',
             isCanTurn:true,
-          }
+          },
+          {component: '404', isCanTurn:true}
         ],
       },
 
